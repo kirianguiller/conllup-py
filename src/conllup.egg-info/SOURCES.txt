@@ -1,0 +1,11 @@
+README.md
+license.txt
+pyproject.toml
+setup.cfg
+src/conllup/__init__.py
+src/conllup/conllup.py
+src/conllup/types.py
+src/conllup.egg-info/PKG-INFO
+src/conllup.egg-info/SOURCES.txt
+src/conllup.egg-info/dependency_links.txt
+src/conllup.egg-info/top_level.txt

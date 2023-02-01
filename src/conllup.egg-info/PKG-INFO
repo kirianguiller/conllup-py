@@ -1,0 +1,103 @@
+Metadata-Version: 2.1
+Name: conllup
+Version: 0.1.0
+Summary: Convert CONLLU to/from JSON format
+Author: Kirian GUILLER
+Author-email: kirianguiller@gmail.com
+License: MIT
+Keywords: CONLLU,JSON,arborator
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.6
+
+# CONLLUP Python (conllup-py)
+
+Convert .conlly dependency graph to/from JSON format (supported by arboratorgrew)\*
+
+## Usefull links
+
+- [conllup-js](https://github.com/kirianguiller/conllup-js) : Javascript version of this library
+- [ArboratorGrew](https://arboratorgrew.elizia.net/#/) : An online collaborative annotation tools, that use the same JSON format for the dependency trees
+
+## sentenceJson interface
+
+```json
+{
+    "metaJson": {
+        "sent_id": "corpusA_sent1",
+        "text": "I eat an apple",
+    },
+    "treeJson": {
+        "nodesJson": {
+            "1": {
+                "ID": "1",
+                "FORM": "I",
+                "LEMMA": "_",
+                "UPOS": "_",
+                "XPOS": "_",
+                "FEATS": {},
+                "HEAD": 4,
+                "DEPREL": "_",
+                "DEPS": {},
+                "MISC": {},
+            },
+            "2": {
+                "ID": "2",
+                "FORM": "eat",
+                "LEMMA": "_",
+                "UPOS": "_",
+                "XPOS": "_",
+                "FEATS": {},
+                "HEAD": 0,
+                "DEPREL": "_",
+                "DEPS": {},
+                "MISC": {},
+            },
+            "3": {
+                "ID": "3",
+                "FORM": "an",
+                "LEMMA": "a",
+                "UPOS": "DET",
+                "XPOS": "_",
+                "FEATS": {},
+                "HEAD": 4,
+                "DEPREL": "_",
+                "DEPS": {},
+                "MISC": {},
+            },
+            "4": {
+                "ID": "4",
+                "FORM": "apple",
+                "LEMMA": "apple",
+                "UPOS": "NOUN",
+                "XPOS": "_",
+                "FEATS": {},
+                "HEAD": 2,
+                "DEPREL": "_",
+                "DEPS": {},
+                "MISC": {},
+            }
+        },
+        "groupsJson": {}
+    }
+}
+
+```
+
+## Deploy new release
+
+Require to have `pip install twine setuptools build` before doing any build 0) check all tests are passing `python3 -m pytest`
+
+1. change versions
+2. build new package `python3 -m build`
+3. upload to pypi `python3 -m twine upload --repository pypi dist/*`
+
+MIT License
+
+Copyright (c) 2023 GUILLER Kirian
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
