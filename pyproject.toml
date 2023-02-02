@@ -1,3 +1,8 @@
 [project]
 name = "conllup"
 version = "0.1.0"
+dynamic = ["authors", "description", "requires-python", "dependencies", "classifiers", "keywords", "license", "readme"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

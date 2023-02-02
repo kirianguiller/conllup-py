@@ -79,3 +79,4 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 1. change versions
 2. build new package `python3 -m build`
 3. upload to pypi `python3 -m twine upload --repository pypi dist/*`
+4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`

@@ -1,5 +1,4 @@
-from typing_extensions import TypedDict
-from typing import Dict
+from typing import Dict, TypedDict
 
 
 featuresJson_T = Dict[str, str]
