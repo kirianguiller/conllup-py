@@ -39,7 +39,8 @@ def emptySentenceConllu(sentenceConllu: str) -> str:
         if line[0] == "#":
             emptiedConllLines.append(line)
         else:
-            emptiedLine = "\t".join(line.split("\t")[0:1]) + ('\t_' * 8)
+            [tokenId, tokenForm] = line.split("\t")[0:2]
+            emptiedLine = f'{tokenId}\t{tokenForm}\t_\t_\t_\t_\t_\t_\t_\t_'
             emptiedConllLines.append(emptiedLine)
     return "\n".join(emptiedConllLines) + "\n"
 
