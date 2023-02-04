@@ -82,7 +82,7 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`
 
 ## Changelog
-### 0.1.1 (in development)
+### 0.2.0
 - added `constructTextFromTreeJson` method (in `processing.py` file)
 - added `emptySentenceConllu` method (in `processing.py` file)
 - added `changeMetaFieldInSentenceConllu` method (in `processing.py` file)
