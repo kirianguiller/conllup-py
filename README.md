@@ -84,6 +84,8 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 ## Changelog
 ### 0.1.1 (in development)
 - added `constructTextFromTreeJson` method (in `processing.py` file)
+- added `emptySentenceConllu` method (in `processing.py` file)
+- added `changeMetaFieldInSentenceConllu` method (in `processing.py` file)
 - minor: some more typing annotations
 ### 0.1.0
 First release, with the core methods : `sentenceConllToJson` and `sentenceJsonToConll`

@@ -14,9 +14,9 @@ mappingSpacesAfter: List[Tuple[str, str]] = [
 
 
 def constructTextFromTreeJson(treeJson: treeJson_T) -> str:
-    sentence = ""
+    sentence: str = ""
     for token in treeJson["nodesJson"].values():
-        if token and _isGroupToken(token) == False:
+        if token and not _isGroupToken(token):
             form = token["FORM"]
             space = "" if token["MISC"].get("SpaceAfter") == "No" else " "
             if token["MISC"].get("SpacesAfter"):
@@ -28,3 +28,30 @@ def constructTextFromTreeJson(treeJson: treeJson_T) -> str:
                 continue
             sentence = sentence + form + space
     return sentence
+
+
+def emptySentenceConllu(sentenceConllu: str) -> str:
+    emptiedConllLines = []
+    for line in sentenceConllu.split("\n"):
+        if line == "":
+            # the last element of a newline-splitted conll array might is an empty string
+            continue
+        if line[0] == "#":
+            emptiedConllLines.append(line)
+        else:
+            emptiedLine = "\t".join(line.split("\t")[0:1]) + ('\t_' * 8)
+            emptiedConllLines.append(emptiedLine)
+    return "\n".join(emptiedConllLines) + "\n"
+
+
+def changeMetaFieldInSentenceConllu(conllu: str, targetField: str, newValue: str) -> str:
+    outputConlluLines = []
+    for line in conllu.split("\n"):
+        if line.startswith("#"):
+            field = line.split(" = ")[0].strip("# ")
+            if field == targetField:
+                line = "# " + targetField + " = " + str(newValue)
+
+        outputConlluLines.append(line)
+
+    return "\n".join(outputConlluLines)
