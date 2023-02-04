@@ -200,7 +200,11 @@ def test_seperateMetaAndTreeFromSentenceConll():
 
 def test_metaConllLinesToJson():
     assert _metaConllLinesToJson(metaConllLines) == metaJson
-    
+    assert _metaConllLinesToJson(["# weird_len_1 = "]) == {"weird_len_1": ""}
+    assert _metaConllLinesToJson(["# weird_len_3 = 1 + 1 = 3"]) == {"weird_len_3": "1 + 1 = 3"}
+    assert _metaConllLinesToJson(["# weird_len_4 = 1 + 1 = 3 = 6/2"]) == {"weird_len_4": "1 + 1 = 3 = 6/2"}
+    assert _metaConllLinesToJson(["# weird_len_0"]) == {}
+
 
 def test_treeConllLinesToJson():
     assert _treeConllLinesToJson(treeConllLines) == treeJson

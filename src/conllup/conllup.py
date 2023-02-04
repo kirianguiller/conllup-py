@@ -192,11 +192,27 @@ def _isGroupToken(tokenJson: tokenJson_T) -> bool:
 def _metaConllLinesToJson(metaConllLines: List[str]) -> metaJson_T:
     metaJson: metaJson_T = emptyMetaJson()
     for metaCouple in metaConllLines:
-        [metaKey, metaValue] = metaCouple.split(" = ")
+        if " = " not in metaCouple:
+            # unvalid line, skipping
+            continue
+        splittedKeyValue = metaCouple.split(" = ")
+        if len(splittedKeyValue) == 2:
+            # normal situation : `# meta_key = my meta value`
+            [metaKey, metaValue] = splittedKeyValue
+        elif len(splittedKeyValue) == 1:
+            # weird case with no value, like : `# text_ortho = `
+            metaKey = splittedKeyValue[0]
+            metaValue = ""
+        elif len(splittedKeyValue) >= 3:
+            # if "=" signe occur in the value : `# text = 2 + 2 = 1`
+            metaKey = splittedKeyValue[0]
+            metaValue = " = ".join(splittedKeyValue[1:])
+        else:
+            # weird case (len = 0), where no "=" is in the meta, we skip it
+            continue
         trimmedMetaKey = metaKey.strip("# ")
         metaJson[trimmedMetaKey] = metaValue
     return metaJson
-
 
 def _treeConllLinesToJson(treeConllLines: List[str]) -> treeJson_T:
     treeJson = emptyTreeJson()
