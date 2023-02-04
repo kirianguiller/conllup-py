@@ -4,3 +4,4 @@ venv/
 .mypy_cache/
 dist/
 src/conllup.egg-info/
+/src/conllup.egg-info/

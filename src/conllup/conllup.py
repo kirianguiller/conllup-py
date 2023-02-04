@@ -68,7 +68,7 @@ def emptySentenceJson() -> sentenceJson_T:
     }
 
 
-def _featuresConllToJson(featuresConll):
+def _featuresConllToJson(featuresConll: str) -> featuresJson_T:
     if featuresConll == "_":
         return emptyFeaturesJson()
 
