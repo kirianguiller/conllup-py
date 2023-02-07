@@ -82,6 +82,7 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`
 
 ## Changelog
+### 0.3.0: add `replaceArrayOfTokens()` in `processing.py`
 ### 0.2.1
 - fixed : `_metaConllLinesToJson() `when wrong formatting of meta line when missing part after equal sign (`# meta without right part = `)
 ### 0.2.0

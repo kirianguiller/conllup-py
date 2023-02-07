@@ -31,18 +31,21 @@ def emptyFeaturesJson() -> featuresJson_T:
     return {}
 
 
-def emptyNodeJson() -> tokenJson_T:
+def emptyNodeJson(ID: str = "_", FORM: str = "_", LEMMA: str = "_", UPOS: str = "_", XPOS: str = "_",
+                  FEATS: featuresJson_T = {},
+                  HEAD: int = -1,
+                  DEPREL: str = "_", DEPS: featuresJson_T = {}, MISC: featuresJson_T = {}) -> tokenJson_T:
     return {
-        "ID": "_",
-        "FORM": "_",
-        "LEMMA": "_",
-        "UPOS": "_",
-        "XPOS": "_",
-        "FEATS": emptyFeaturesJson(),
-        "HEAD": -1,
-        "DEPREL": "_",
-        "DEPS": emptyFeaturesJson(),
-        "MISC": emptyFeaturesJson(),
+        "ID": ID,
+        "FORM": FORM,
+        "LEMMA": LEMMA,
+        "UPOS": UPOS,
+        "XPOS": XPOS,
+        "FEATS": FEATS,
+        "HEAD": HEAD,
+        "DEPREL": DEPREL,
+        "DEPS": DEPS,
+        "MISC": MISC,
     }
 
 
@@ -162,7 +165,7 @@ class _seperateMetaAndTreeFromSentenceConll_RV(TypedDict):
 
 
 def _seperateMetaAndTreeFromSentenceConll(
-    sentenceConll: str,
+        sentenceConll: str,
 ) -> _seperateMetaAndTreeFromSentenceConll_RV:
     trimmedSentenceConll = sentenceConll.rstrip().strip()
     linesConll = trimmedSentenceConll.split("\n")
@@ -214,6 +217,7 @@ def _metaConllLinesToJson(metaConllLines: List[str]) -> metaJson_T:
         metaJson[trimmedMetaKey] = metaValue
     return metaJson
 
+
 def _treeConllLinesToJson(treeConllLines: List[str]) -> treeJson_T:
     treeJson = emptyTreeJson()
 
@@ -263,40 +267,44 @@ def _compareTokenIndexes(a: str, b: str) -> int:
     else:
         return len(b) - len(a)
 
+
 import functools
 
+
 def _sortTokenIndexes(tokenIndexes: List[str]) -> List[str]:
-  return sorted(tokenIndexes, key=functools.cmp_to_key(_compareTokenIndexes))
+    return sorted(tokenIndexes, key=functools.cmp_to_key(_compareTokenIndexes))
 
 
 def _treeJsonToConll(treeJson: treeJson_T) -> str:
-  treeConllLines: List[str] = []
-  tokensJson = {**treeJson["nodesJson"], **treeJson["groupsJson"]}
-  tokenIndexes = [token["ID"] for token in tokensJson.values()]
-  sortedTokenIndexes = _sortTokenIndexes(tokenIndexes)
-  for tokenIndex in sortedTokenIndexes:
-    tokenJson = tokensJson[tokenIndex]
-    tokenConll = _tokenJsonToConll(tokenJson)
-    treeConllLines.append(tokenConll)
+    treeConllLines: List[str] = []
+    tokensJson = {**treeJson["nodesJson"], **treeJson["groupsJson"]}
+    tokenIndexes = [token["ID"] for token in tokensJson.values()]
+    sortedTokenIndexes = _sortTokenIndexes(tokenIndexes)
+    for tokenIndex in sortedTokenIndexes:
+        tokenJson = tokensJson[tokenIndex]
+        tokenConll = _tokenJsonToConll(tokenJson)
+        treeConllLines.append(tokenConll)
 
-  treeConll = '\n'.join(treeConllLines)
-  return treeConll
+    treeConll = '\n'.join(treeConllLines)
+    return treeConll
+
 
 def _metaJsonToConll(metaJson: metaJson_T) -> str:
-  metaConllLines: List[str] = []
+    metaConllLines: List[str] = []
 
-  for metaKey in metaJson:
-      metaValue = metaJson[metaKey]
-      metaConllLine = f"# {metaKey} = {metaValue}"
-      metaConllLines.append(metaConllLine)
+    for metaKey in metaJson:
+        metaValue = metaJson[metaKey]
+        metaConllLine = f"# {metaKey} = {metaValue}"
+        metaConllLines.append(metaConllLine)
 
-  metaConll = '\n'.join(metaConllLines)
+    metaConll = '\n'.join(metaConllLines)
 
-  return metaConll
+    return metaConll
+
 
 def sentenceJsonToConll(sentenceJson: sentenceJson_T) -> str:
-  metaConll = _metaJsonToConll(sentenceJson["metaJson"])
-  treeConll = _treeJsonToConll(sentenceJson["treeJson"])
-  if metaConll == '':
-    return treeConll
-  return f"{metaConll}\n{treeConll}"
+    metaConll = _metaJsonToConll(sentenceJson["metaJson"])
+    treeConll = _treeJsonToConll(sentenceJson["treeJson"])
+    if metaConll == '':
+        return treeConll
+    return f"{metaConll}\n{treeConll}"
