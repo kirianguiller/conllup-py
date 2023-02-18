@@ -62,7 +62,7 @@ metaConll: str = "# meta_key = meta_value\n# meta_key2 = meta_value2"
 metaConllLines: List[str] = metaConll.split("\n")
 treeConll: str = f"{tokenConll}"
 treeConllLines: List[str] = treeConll.split("\n")
-sentenceConll: str = f"{metaConll}\n{treeConll}"
+sentenceConll: str = f"{metaConll}\n{treeConll}\n"
 
 untrimmedMetaConll: str = "# meta_key = meta_value\n       # meta_key2 = meta_value2"
 untrimmedMetaConllLines: List[str] = metaConll.split("\n")
@@ -150,6 +150,7 @@ def test_featuresConllToJson():
 
 def test_featuresJsonToConll():
     assert _featuresJsonToConll(featuresJson) == featuresConll
+    assert _featuresJsonToConll({"b": "2", "a": "1"}) == "a=1|b=2"  # test for alphabetical ordering of the features
 
 
 def test_decodeTabData():
@@ -165,8 +166,8 @@ def test_encodeTabData():
     assert _encodeTabData("3") == "3"
     assert _encodeTabData({"person": "first"}) == "person=first"
     with pytest.raises(Exception):
+        # noinspection PyTypeChecker
         _encodeTabData(["1", "2"])
-
 
 
 def test_tokenConllToJson():
@@ -228,3 +229,13 @@ def test_compareTokenIndexes():
 
 def test_sortTokenIndexes():
     assert _sortTokenIndexes(["4", "1", "7", "2-6", "2", "6"]) == ["1", "2-6", "2", "4", "6", "7"]
+
+
+
+sentenceConll2 = """1-2\tit's\t_\t_\t_\t_\t_\t_\t_\t_
+1\tit\tit\t_\t_\t_\t_\t_\t_\t_
+2\t's\t's\t_\t_\t_\t_\t_\t_\t_
+"""
+def test_sentenceConllToJsonToConll():
+    assert sentenceJsonToConll(sentenceConllToJson(sentenceConll)) == sentenceConll
+    assert sentenceJsonToConll(sentenceConllToJson(sentenceConll2)) == sentenceConll2

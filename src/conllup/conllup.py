@@ -307,6 +307,4 @@ def _metaJsonToConll(metaJson: metaJson_T) -> str:
 def sentenceJsonToConll(sentenceJson: sentenceJson_T) -> str:
     metaConll = _metaJsonToConll(sentenceJson["metaJson"])
     treeConll = _treeJsonToConll(sentenceJson["treeJson"])
-    if metaConll == '':
-        return treeConll
-    return f"{metaConll}\n{treeConll}"
+    return "\n".join([metaConll, treeConll]).strip() + "\n"
