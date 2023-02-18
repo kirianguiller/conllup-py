@@ -1,3 +1,4 @@
+import os.path
 from typing import Dict, List, TypedDict, Union, Literal
 
 from .types import featuresJson_T, tokenJson_T, metaJson_T, treeJson_T, sentenceJson_T
@@ -308,3 +309,28 @@ def sentenceJsonToConll(sentenceJson: sentenceJson_T) -> str:
     metaConll = _metaJsonToConll(sentenceJson["metaJson"])
     treeConll = _treeJsonToConll(sentenceJson["treeJson"])
     return "\n".join([metaConll, treeConll]).strip() + "\n"
+
+
+def readConlluFile(filePath: str):
+    if not os.path.isfile(filePath):
+        raise Exception(f"No file found  `{filePath}`")
+    sentencesJson: List[sentenceJson_T] = []
+    with open(filePath, "r", encoding="utf-8") as infile:
+        for potentialSentenceConll in infile.read().split("\n\n"):
+            if potentialSentenceConll.strip():
+                sentencesJson.append(sentenceConllToJson(potentialSentenceConll))
+    return sentencesJson
+
+
+def _getStringForManySentencesJson(sentencesJson: List[sentenceJson_T]):
+    sentencesConll = [sentenceJsonToConll(sentenceJson) for sentenceJson in sentencesJson]
+    concatString = "\n".join(sentencesConll) + "\n"
+    return concatString
+
+
+def writeConlluFile(filePath: str, sentencesJson: List[sentenceJson_T], overwrite=False):
+    if (overwrite is False) and os.path.isfile(filePath):
+        raise Exception(f"Already found a file in`{filePath}`. Consider passing `overwrite=True` to this function")
+    concatSentencesConll = _getStringForManySentencesJson(sentencesJson)
+    with open(filePath, "w", encoding="utf-8") as outfile:
+        outfile.write(concatSentencesConll)

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List
 import pytest
 from src.conllup.conllup import (
@@ -6,7 +7,7 @@ from src.conllup.conllup import (
     emptyNodesOrGroupsJson,
     emptyTreeJson,
     emptyMetaJson,
-    emptySentenceJson,
+    emptySentenceJson, readConlluFile, _getStringForManySentencesJson,
 )
 from src.conllup.types import (
     sentenceJson_T,
@@ -231,11 +232,25 @@ def test_sortTokenIndexes():
     assert _sortTokenIndexes(["4", "1", "7", "2-6", "2", "6"]) == ["1", "2-6", "2", "4", "6", "7"]
 
 
-
 sentenceConll2 = """1-2\tit's\t_\t_\t_\t_\t_\t_\t_\t_
 1\tit\tit\t_\t_\t_\t_\t_\t_\t_
 2\t's\t's\t_\t_\t_\t_\t_\t_\t_
 """
+
+
 def test_sentenceConllToJsonToConll():
     assert sentenceJsonToConll(sentenceConllToJson(sentenceConll)) == sentenceConll
     assert sentenceJsonToConll(sentenceConllToJson(sentenceConll2)) == sentenceConll2
+
+
+PATH_TEST_DATA_FOLDER = Path(__file__).parent / "data"
+PATH_TEST_CONLLU = str(PATH_TEST_DATA_FOLDER / "english.conllu")
+
+
+def test_readConlluFile():
+    sentencesJson = readConlluFile(PATH_TEST_CONLLU)
+    assert len(sentencesJson) == 2
+
+
+def test_getStringForManySentencesJson():
+    assert _getStringForManySentencesJson([sentenceConllToJson(sentenceConll2)]) == sentenceConll2 + "\n"

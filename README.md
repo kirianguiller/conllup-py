@@ -82,6 +82,8 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`
 
 ## Changelog
+### 0.4.0:
+- add `writeConlluFile()` and `readConlluFile()` to handle file reading and writing
 ### 0.3.1: 
 - sorting of feature json when converted to conll string
 ### 0.3.0: add `replaceArrayOfTokens()` in `processing.py`
