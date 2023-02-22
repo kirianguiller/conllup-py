@@ -14,20 +14,6 @@ class tabMeta_T(TypedDict):
     type: tabType_T
 
 
-CONLL_STRUCTURE: Dict[int, tabMeta_T] = {
-    0: {"label": "ID", "type": "str"},
-    1: {"label": "FORM", "type": "str"},
-    2: {"label": "LEMMA", "type": "str"},
-    3: {"label": "UPOS", "type": "str"},
-    4: {"label": "XPOS", "type": "str"},
-    5: {"label": "FEATS", "type": "dict"},
-    6: {"label": "HEAD", "type": "int"},
-    7: {"label": "DEPREL", "type": "str"},
-    8: {"label": "DEPS", "type": "dict"},
-    9: {"label": "MISC", "type": "dict"},
-}
-
-
 def emptyFeaturesJson() -> featuresJson_T:
     return {}
 
@@ -74,7 +60,7 @@ def emptySentenceJson() -> sentenceJson_T:
 
 def _featuresConllToJson(featuresConll: str) -> featuresJson_T:
     if featuresConll == "_":
-        return emptyFeaturesJson()
+        return {}
 
     featuresJson = emptyFeaturesJson()
     splittedFeaturesStrings = featuresConll.split("|")
@@ -112,34 +98,17 @@ def _normalizeHyphensInTab(tokenTabData: str, tabLabel: str):
     return tokenTabData
 
 
-def _decodeTabData(tokenTabData: str, type: str) -> Union[str, int, featuresJson_T]:
-    if type == "str":
-        return tokenTabData
-    elif type == "int":
-        if tokenTabData == "_":
-            return -1
-        else:
-            return int(tokenTabData, 10)
-
-    elif type == "dict":
-        return _featuresConllToJson(tokenTabData)
+def _encode_int_data(data):
+    if data == -1:
+        return "_"
     else:
-        raise Exception(f"{type} is not a correct type")
+        return str(data)
 
-
-def _encodeTabData(tabData: Union[featuresJson_T, str, int]) -> str:
-    if type(tabData) == str:
-        return tabData
-    elif type(tabData) == int:
-        if tabData == -1:
-            return "_"
-        else:
-            return str(tabData)
-    elif type(tabData) == dict:
-        return _featuresJsonToConll(tabData)
+def _decode_int_data(data):
+    if data == "_":
+        return -1
     else:
-        raise Exception(f"Wrong type for tabData `{type(tabData)}`")
-
+        return int(data, 10)
 
 def _tokenConllToJson(nodeConll: str) -> tokenJson_T:
     trimmedNodeConll = nodeConll.rstrip().strip()
@@ -149,16 +118,19 @@ def _tokenConllToJson(nodeConll: str) -> tokenJson_T:
             f'CONLL PARSING ERROR : line "{nodeConll}" is not valid, {len(splittedNodeConll)} columns found instead of 10'
         )
 
-    tokenJson = emptyNodeJson()
-    for [tabIndex, tabMeta] in CONLL_STRUCTURE.items():
-        tabLabel = tabMeta["label"]
-        tabType = tabMeta["type"]
-
-        tabDataUnormalized = splittedNodeConll[tabIndex]
-        tabData = _normalizeHyphensInTab(tabDataUnormalized, tabLabel)
-
-        tokenJson[tabLabel] = _decodeTabData(tabData, tabType)
-
+    head_str = splittedNodeConll[6]
+    tokenJson = {
+        "ID": splittedNodeConll[0],
+        "FORM": splittedNodeConll[1],
+        "LEMMA": splittedNodeConll[2],
+        "UPOS": splittedNodeConll[3],
+        "XPOS": splittedNodeConll[4],
+        "FEATS": _featuresConllToJson(splittedNodeConll[5]),
+        "HEAD": _decode_int_data(splittedNodeConll[6]),
+        "DEPREL": splittedNodeConll[7],
+        "DEPS": _featuresConllToJson(splittedNodeConll[8]),
+        "MISC": _featuresConllToJson(splittedNodeConll[9])
+    }
     return tokenJson
 
 
@@ -250,15 +222,18 @@ def sentenceConllToJson(sentenceConll: str) -> sentenceJson_T:
 
 
 def _tokenJsonToConll(tokenJson: tokenJson_T) -> str:
-    splittedTokenConll: List[str] = []
-    for tabIndex in CONLL_STRUCTURE:
-        tabMeta = CONLL_STRUCTURE[tabIndex]
-        tabLabel = tabMeta["label"]
+    ID = tokenJson["ID"]
+    FORM = tokenJson["FORM"]
+    LEMMA = tokenJson["LEMMA"]
+    UPOS = tokenJson["UPOS"]
+    XPOS = tokenJson["XPOS"]
+    FEATS = _featuresJsonToConll(tokenJson["FEATS"])
+    HEAD = _encode_int_data(tokenJson["HEAD"])
+    DEPREL = tokenJson["DEPREL"]
+    DEPS = _featuresJsonToConll(tokenJson["DEPS"])
+    MISC = _featuresJsonToConll(tokenJson["MISC"])
 
-        tabDataJson = tokenJson[tabLabel]
-        tabDataConll = _encodeTabData(tabDataJson)
-        splittedTokenConll.append(tabDataConll)
-    tokenConll = "\t".join(splittedTokenConll)
+    tokenConll = f"{ID}\t{FORM}\t{LEMMA}\t{UPOS}\t{XPOS}\t{FEATS}\t{HEAD}\t{DEPREL}\t{DEPS}\t{MISC}"
     return tokenConll
 
 
@@ -323,6 +298,23 @@ def readConlluFile(filePath: str, keepEmptyTrees = False):
                     sentencesJson.append(sentenceConllToJson(potentialSentenceConll))
     return sentencesJson
 
+
+def readConlluFile(filePath: str, keepEmptyTrees = False):
+    if not os.path.isfile(filePath):
+        raise Exception(f"No file found  `{filePath}`")
+    sentencesJson: List[sentenceJson_T] = []
+    with open(filePath, "r", encoding="utf-8") as infile:
+        currentConll = ""
+        for line in infile:
+            if line == "\n":
+                if currentConll.strip():
+                    sentenceJson = sentenceConllToJson(currentConll)
+                    if keepEmptyTrees == True or len(sentenceJson["treeJson"]["nodesJson"].values()):
+                        sentencesJson.append(sentenceConllToJson(currentConll))
+                    currentConll = ""
+            else:
+                currentConll += line
+    return sentencesJson
 
 def _getStringForManySentencesJson(sentencesJson: List[sentenceJson_T]):
     sentencesConll = [sentenceJsonToConll(sentenceJson) for sentenceJson in sentencesJson]

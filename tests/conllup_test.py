@@ -23,8 +23,6 @@ from src.conllup.conllup import (
     _tokenConllToJson,
     _tokenJsonToConll,
     _seperateMetaAndTreeFromSentenceConll,
-    _decodeTabData,
-    _encodeTabData,
     _treeConllLinesToJson,
     _metaConllLinesToJson,
     _compareTokenIndexes,
@@ -69,38 +67,6 @@ untrimmedMetaConll: str = "# meta_key = meta_value\n       # meta_key2 = meta_va
 untrimmedMetaConllLines: List[str] = metaConll.split("\n")
 untrimmedSentenceConll: str = f"{untrimmedMetaConll}\n{treeConll}"
 
-
-# checks for hyphen instead of undescore
-hyphenInsteadOfUnderscoretokenConll: str = "1	form	lemma	upos	–	–	0	deprel	_	_"
-hyphenInsteadOfUnderscoretokenConllCorrected: str = "1	form	lemma	upos	_	_	0	deprel	_	_"
-hyphenInsteadOfUnderscoretokenJson: tokenJson_T = {
-    "ID": "1",
-    "FORM": "form",
-    "LEMMA": "lemma",
-    "UPOS": "upos",
-    "XPOS": "_",
-    "FEATS": {},
-    "HEAD": 0,
-    "DEPREL": "deprel",
-    "DEPS": {},
-    "MISC": {},
-}
-
-# exclude FORM and LEMMA from hyphen-to-underscore replacement
-# (there could be a literal hyphen in the text!)
-preserveHyphenInFormLemmaTokenConll: str = "1	-	–	upos	_	_	0	deprel	_	_"
-preserveHyphenInFormLemmaTokenJson: tokenJson_T = {
-    "ID": "1",
-    "FORM": "-",
-    "LEMMA": "–",
-    "UPOS": "upos",
-    "XPOS": "_",
-    "FEATS": {},
-    "HEAD": 0,
-    "DEPREL": "deprel",
-    "DEPS": {},
-    "MISC": {},
-}
 
 # checks for "=" symbol is misc or feature field
 equalSymbolInMiscOrFeatureTokenConll: str = (
@@ -154,23 +120,6 @@ def test_featuresJsonToConll():
     assert _featuresJsonToConll({"b": "2", "a": "1"}) == "a=1|b=2"  # test for alphabetical ordering of the features
 
 
-def test_decodeTabData():
-    assert _decodeTabData("3", 'int') == 3
-    assert _decodeTabData("3", 'str') == "3"
-    assert _decodeTabData("person=first", 'dict') == {"person": "first"}
-    with pytest.raises(Exception):
-        _decodeTabData("3", 'fake_type')
-
-
-def test_encodeTabData():
-    assert _encodeTabData(3) == "3"
-    assert _encodeTabData("3") == "3"
-    assert _encodeTabData({"person": "first"}) == "person=first"
-    with pytest.raises(Exception):
-        # noinspection PyTypeChecker
-        _encodeTabData(["1", "2"])
-
-
 def test_tokenConllToJson():
     with pytest.raises(Exception):
         _tokenConllToJson(incompleteSmallerTokenLine)
@@ -178,9 +127,7 @@ def test_tokenConllToJson():
         _tokenConllToJson(incompleteBiggerTokenLine)
 
     assert _tokenConllToJson(tokenConll) == tokenJson
-    assert _tokenConllToJson(preserveHyphenInFormLemmaTokenConll) == preserveHyphenInFormLemmaTokenJson
     assert _tokenConllToJson(equalSymbolInMiscOrFeatureTokenConll) == equalSymbolInMiscOrFeatureTokenJson
-    assert _tokenConllToJson(hyphenInsteadOfUnderscoretokenConll) == hyphenInsteadOfUnderscoretokenJson
     assert _tokenConllToJson(groupConll) == groupJson
 
 

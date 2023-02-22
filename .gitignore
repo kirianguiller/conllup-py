@@ -4,3 +4,8 @@ venv/
 .mypy_cache/
 dist/
 **/*.egg-info/
+
+**/*.pclprof
+
+
+.idea/
