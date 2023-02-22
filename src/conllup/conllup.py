@@ -187,7 +187,7 @@ def _seperateMetaAndTreeFromSentenceConll(
             treeLines.append(trimmedLineConll)
 
     if len(treeLines) == 0:
-        raise Exception(f"Invalid CONLL : No token found \n$ '{sentenceConll}'")
+        print(f"Invalid CONLL : No token found \n$ '{sentenceConll}'")
     return {"metaLines": metaLines, "treeLines": treeLines}
 
 
@@ -311,14 +311,16 @@ def sentenceJsonToConll(sentenceJson: sentenceJson_T) -> str:
     return "\n".join([metaConll, treeConll]).strip() + "\n"
 
 
-def readConlluFile(filePath: str):
+def readConlluFile(filePath: str, keepEmptyTrees = False):
     if not os.path.isfile(filePath):
         raise Exception(f"No file found  `{filePath}`")
     sentencesJson: List[sentenceJson_T] = []
     with open(filePath, "r", encoding="utf-8") as infile:
         for potentialSentenceConll in infile.read().split("\n\n"):
             if potentialSentenceConll.strip():
-                sentencesJson.append(sentenceConllToJson(potentialSentenceConll))
+                sentenceJson = sentenceConllToJson(potentialSentenceConll)
+                if keepEmptyTrees == True or len(sentenceJson["treeJson"]["nodesJson"].values()):
+                    sentencesJson.append(sentenceConllToJson(potentialSentenceConll))
     return sentencesJson
 
 
