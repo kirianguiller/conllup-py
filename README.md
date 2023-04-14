@@ -76,7 +76,7 @@ Convert .conlly dependency graph to/from JSON format (supported by arboratorgrew
 
 Require to have `pip install twine setuptools build` before doing any build 0) check all tests are passing `python3 -m pytest`
 
-1. change versions
+1. change versions in pyproject.toml
 2. build new package `python3 -m build`
 3. upload to pypi `python3 -m twine upload --repository pypi dist/*`
 4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`

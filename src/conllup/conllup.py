@@ -71,6 +71,9 @@ def _featuresConllToJson(featuresConll: str) -> featuresJson_T:
         featureValue = "=".join(
             splittedFeature[1:]
         )  # reconstructing for this case : 'person=first=second'
+        if featuresJson.get(featureKey):
+            # we add all duplicated keys in this list, as it's forbidden in conll format
+            raise Exception(f"DUPLICATED KEY : found (among others) the duplicated `{featureKey}` key")
         featuresJson[featureKey] = featureValue
 
     return featuresJson
@@ -115,10 +118,9 @@ def _tokenConllToJson(nodeConll: str) -> tokenJson_T:
     splittedNodeConll = trimmedNodeConll.split("\t")
     if len(splittedNodeConll) != 10:
         raise Exception(
-            f'CONLL PARSING ERROR : line "{nodeConll}" is not valid, {len(splittedNodeConll)} columns found instead of 10'
+            f'COLUMNS NUMBER ERROR : {len(splittedNodeConll)} columns found instead of 10  --- line content = "{nodeConll}"'
         )
 
-    head_str = splittedNodeConll[6]
     tokenJson = {
         "ID": splittedNodeConll[0],
         "FORM": splittedNodeConll[1],
@@ -286,35 +288,58 @@ def sentenceJsonToConll(sentenceJson: sentenceJson_T) -> str:
     return "\n".join([metaConll, treeConll]).strip() + "\n"
 
 
+
+
+class EmptyConllError(Exception):
+    pass
+
+class ConllParseError(Exception):
+    pass
+
+def findConllFormatErrors(conllText):
+    errorsMessages = []
+    for idxLine, line in enumerate(conllText.rstrip().split("\n"), start=1):
+        errorSuffix = f"Line {idxLine} : "
+        if line.strip().rstrip():
+            if line[0] != "#":
+                try:
+                    _tokenConllToJson(line)
+                except Exception as e:
+                    errorsMessages.append(errorSuffix + str(e))
+    return errorsMessages
+
+
 def readConlluFile(filePath: str, keepEmptyTrees = False):
     if not os.path.isfile(filePath):
-        raise Exception(f"No file found  `{filePath}`")
+        raise FileNotFoundError(f"No file found `{filePath}`")
+
+    if os.path.getsize(filePath) == 0:
+        raise EmptyConllError(f"You provided an empty conllu `{filePath}`")
+
     sentencesJson: List[sentenceJson_T] = []
     with open(filePath, "r", encoding="utf-8") as infile:
-        for potentialSentenceConll in infile.read().split("\n\n"):
+        conllContent = infile.read().rstrip()
+
+    try:
+        for potentialSentenceConll in conllContent.split("\n\n"):
             if potentialSentenceConll.strip():
                 sentenceJson = sentenceConllToJson(potentialSentenceConll)
-                if keepEmptyTrees == True or len(sentenceJson["treeJson"]["nodesJson"].values()):
+                if keepEmptyTrees or len(sentenceJson["treeJson"]["nodesJson"].values()):
                     sentencesJson.append(sentenceConllToJson(potentialSentenceConll))
+
+    except Exception as e:
+        errors = findConllFormatErrors(conllContent)
+        if len(errors):
+            # we have detected errors manually
+            errorText = "\n".join(findConllFormatErrors(conllContent))
+        else:
+            # no error was found manually, the error is something else
+            errorText = str(e)
+        fileName = filePath.split("/")[-1]
+        raise ConllParseError(f"Parsing Errors with file `{fileName}` :\n{errorText}")
+
     return sentencesJson
 
-
-def readConlluFile(filePath: str, keepEmptyTrees = False):
-    if not os.path.isfile(filePath):
-        raise Exception(f"No file found  `{filePath}`")
-    sentencesJson: List[sentenceJson_T] = []
-    with open(filePath, "r", encoding="utf-8") as infile:
-        currentConll = ""
-        for line in infile:
-            if line == "\n":
-                if currentConll.strip():
-                    sentenceJson = sentenceConllToJson(currentConll)
-                    if keepEmptyTrees == True or len(sentenceJson["treeJson"]["nodesJson"].values()):
-                        sentencesJson.append(sentenceConllToJson(currentConll))
-                    currentConll = ""
-            else:
-                currentConll += line
-    return sentencesJson
 
 def _getStringForManySentencesJson(sentencesJson: List[sentenceJson_T]):
     sentencesConll = [sentenceJsonToConll(sentenceJson) for sentenceJson in sentencesJson]

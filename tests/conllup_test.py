@@ -3,11 +3,8 @@ from typing import List
 import pytest
 from src.conllup.conllup import (
     emptyFeaturesJson,
-    emptyNodeJson,
     emptyNodesOrGroupsJson,
-    emptyTreeJson,
-    emptyMetaJson,
-    emptySentenceJson, readConlluFile, _getStringForManySentencesJson,
+    readConlluFile, _getStringForManySentencesJson, EmptyConllError, ConllParseError,
 )
 from src.conllup.types import (
     sentenceJson_T,
@@ -113,6 +110,8 @@ incompleteBiggerTokenLine = "1-2	it's	it's	upos	_	_	deprel	_	_	_	_"  # has 11 fe
 def test_featuresConllToJson():
     assert _featuresConllToJson(featuresConll) == featuresJson
     assert _featuresConllToJson("_") == emptyFeaturesJson()
+    with pytest.raises(Exception):
+        _featuresConllToJson("bla=1|bla=2") == {"bla", "2"}
 
 
 def test_featuresJsonToConll():
@@ -197,6 +196,18 @@ PATH_TEST_CONLLU = str(PATH_TEST_DATA_FOLDER / "english.conllu")
 def test_readConlluFile():
     sentencesJson = readConlluFile(PATH_TEST_CONLLU)
     assert len(sentencesJson) == 2
+
+
+PATH_TEST_CONLLU_EMPTY = str(PATH_TEST_DATA_FOLDER / "empty.conllu")
+def test_readConllFile_raise_errors():
+    with pytest.raises(EmptyConllError):
+        readConlluFile(PATH_TEST_CONLLU_EMPTY)
+
+PATH_TEST_CONLLU_CONTAINS_MULTIPLE_ERROR = str(PATH_TEST_DATA_FOLDER / "contains_multiple_errors.conllu")
+def test_readConllFile_raise_errors():
+    with pytest.raises(ConllParseError) as e_info:
+        readConlluFile(PATH_TEST_CONLLU_CONTAINS_MULTIPLE_ERROR)
+    assert e_info.value.args[0] == """Parsing Errors with file `contains_multiple_errors.conllu` :\nLine 5 : COLUMNS NUMBER ERROR : 9 columns found instead of 10  --- line content = \"3	qu'	que	SCONJ	_	_	2	_	SpaceAfter=No\"\nLine 6 : DUPLICATED KEY : found (among others) the duplicated `Mood` key"""
 
 
 def test_getStringForManySentencesJson():
