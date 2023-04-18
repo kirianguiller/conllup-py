@@ -4,7 +4,7 @@ import pytest
 from src.conllup.conllup import (
     emptyFeaturesJson,
     emptyNodesOrGroupsJson,
-    readConlluFile, _getStringForManySentencesJson, EmptyConllError, ConllParseError,
+    readConlluFile, _getStringForManySentencesJson, EmptyConllError, ConllParseError, _sortTokensJson,
 )
 from src.conllup.types import (
     sentenceJson_T,
@@ -212,3 +212,28 @@ def test_readConllFile_raise_errors():
 
 def test_getStringForManySentencesJson():
     assert _getStringForManySentencesJson([sentenceConllToJson(sentenceConll2)]) == sentenceConll2 + "\n"
+
+
+alphabetical_keys_dict = {
+    "1": "un",
+    "15": "quinze",
+    "4": "quatre",
+    "11": "onze",
+    "3": "trois",
+    "5": "cinq",
+    "2": "deux",
+}
+
+alphabetical_keys_dict_sorted = {
+    "1": "un",
+    "2": "deux",
+    "3": "trois",
+    "4": "quatre",
+    "5": "cinq",
+    "11": "onze",
+    "15": "quinze",
+}
+
+def test_sort_tokens_json():
+    # /!\ we can't compare directly the dict because the order of the keys is not guaranteed (pytest order the keys alphabetically already, which make the test success even if the order is different)
+    assert list(_sortTokensJson(alphabetical_keys_dict).keys()) == list(alphabetical_keys_dict_sorted.keys())

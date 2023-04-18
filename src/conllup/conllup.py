@@ -1,7 +1,7 @@
 import os.path
 from typing import Dict, List, TypedDict, Union, Literal
 
-from .types import featuresJson_T, tokenJson_T, metaJson_T, treeJson_T, sentenceJson_T
+from .types import featuresJson_T, tokenJson_T, metaJson_T, treeJson_T, sentenceJson_T, tokensJson_T
 
 tabLabel_T = Literal[
     "ID", "FORM", "LEMMA", "UPOS", "XPOS", "FEATS", "HEAD", "DEPREL", "DEPS", "MISC"
@@ -254,6 +254,13 @@ import functools
 def _sortTokenIndexes(tokenIndexes: List[str]) -> List[str]:
     return sorted(tokenIndexes, key=functools.cmp_to_key(_compareTokenIndexes))
 
+def _sortTokensJson(tokensJson: tokensJson_T) -> tokensJson_T:
+    sortedTokensJson: tokensJson_T = {}
+    tokenIndexes = list(tokensJson.keys())
+    sortedTokenIndexes = _sortTokenIndexes(tokenIndexes)
+    for tokenIndex in sortedTokenIndexes:
+        sortedTokensJson[tokenIndex] = tokensJson[tokenIndex]
+    return sortedTokensJson
 
 def _treeJsonToConll(treeJson: treeJson_T) -> str:
     treeConllLines: List[str] = []

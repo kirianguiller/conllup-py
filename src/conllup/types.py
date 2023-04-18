@@ -15,8 +15,9 @@ class tokenJson_T(TypedDict):
     DEPS: featuresJson_T
     MISC: featuresJson_T
 
-nodesJson_T = Dict[str, tokenJson_T]
-groupsJson_T = Dict[str, tokenJson_T]
+tokensJson_T = Dict[str, tokenJson_T]
+nodesJson_T = tokensJson_T
+groupsJson_T = tokensJson_T
 
 class treeJson_T(TypedDict):
     nodesJson: nodesJson_T

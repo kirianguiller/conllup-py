@@ -1,7 +1,7 @@
 import json
 from typing import List, Tuple, Literal
 
-from .conllup import _isGroupToken, emptyNodesOrGroupsJson, emptyNodeJson
+from .conllup import _isGroupToken, emptyNodesOrGroupsJson, emptyNodeJson, _sortTokensJson
 from .types import treeJson_T, tokenJson_T
 
 mappingSpacesAfter: List[Tuple[str, str]] = [
@@ -163,7 +163,7 @@ def replaceArrayOfTokens(
             replaceAction = 'RENAME_ONE_TOKEN'
         elif len(newTokensForms) >= 1:
             replaceAction = 'SPLIT_ONE_TOKEN_INTO_MANY'
-    print(f"replaceArrayOfTokens() : detected action = {replaceAction}")
+    # print(f"replaceArrayOfTokens() : detected action = {replaceAction}")
 
     startBefore = oldTokensIndexes[0]
     endBefore = oldTokensIndexes[-1]
@@ -208,5 +208,5 @@ def replaceArrayOfTokens(
             else:
                 # the token is a normal token
                 newNodesJson[newTokenJson["ID"]] = newTokenJson
-    newTreeJson: treeJson_T = {"nodesJson": newNodesJson, "groupsJson": newGroupsJson}
+    newTreeJson: treeJson_T = {"nodesJson": _sortTokensJson(newNodesJson), "groupsJson": _sortTokensJson(newGroupsJson)}
     return newTreeJson
