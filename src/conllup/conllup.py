@@ -80,12 +80,10 @@ def _featuresConllToJson(featuresConll: str) -> featuresJson_T:
 
 
 def _featuresJsonToConll(featuresJson: featuresJson_T) -> str:
-    splittedFeatureConll: List[str] = []
-    for [featureKey, featureValue] in featuresJson.items():
-        splittedFeatureConll.append(f"{featureKey}={featureValue}")
-    splittedFeatureConll.sort()
+    featureItems = list(featuresJson.items())
+    featureItems.sort(key=lambda item: item[0].lower())
+    splittedFeatureConll=[f"{item[0]}={item[1]}" for item in featureItems]
     featuresConll = "|".join(splittedFeatureConll)
-    featuresConll = featuresConll
     if featuresConll == "":
         featuresConll = "_"
     return featuresConll
