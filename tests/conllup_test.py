@@ -30,6 +30,7 @@ from src.conllup.conllup import (
 
 
 featuresConll = "feat_key1=feat_value1|feat_key2=feat_value2"
+featuresConllReverseOrder = "feat_key2=feat_value2|feat_key1=feat_value1"
 featuresJson = {"feat_key1": "feat_value1", "feat_key2": "feat_value2"}
 
 tokenConll = "1\tform\tlemma\tupos\txpos\tfeat_key=feat_value\t2\tdeprel\tdep_key=dep_value\tmisc_key=misc_value"
@@ -113,11 +114,19 @@ def test_featuresConllToJson():
     with pytest.raises(Exception):
         _featuresConllToJson("bla=1|bla=2") == {"bla", "2"}
 
-
 def test_featuresJsonToConll():
     assert _featuresJsonToConll(featuresJson) == featuresConll
     assert _featuresJsonToConll({"b": "2", "a": "1"}) == "a=1|b=2"  # test for alphabetical ordering of the features
 
+def test_featuresConllToJsonAndBack():
+    # string to json to string
+    assert _featuresJsonToConll(_featuresConllToJson(featuresConll)) == featuresConll
+    
+    # string (reverse order) to json to string
+    assert _featuresJsonToConll(_featuresConllToJson(featuresConllReverseOrder)) == featuresConll
+    
+    # json to string to json
+    assert _featuresConllToJson(_featuresJsonToConll(featuresJson)) == featuresJson
 
 def test_tokenConllToJson():
     with pytest.raises(Exception):
