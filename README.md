@@ -82,6 +82,9 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`
 
 ## Changelog
+### 0.4.7
+- modify _featuresConllToJson() so it order features in the order [specified by UD](https://universaldependencies.org/format.html) (thank you @bguil): 
+> In sorting, uppercase letters are considered identical to their lowercase counterparts.
 ### 0.4.6
 - add order in place in replaceArrayOfTokens() outputted treeJson (thanks to the new _sortTokensJson())
 ### 0.4.4:
