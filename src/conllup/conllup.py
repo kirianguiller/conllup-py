@@ -310,9 +310,12 @@ class ConllParseError(Exception):
 
 def findConllFormatErrors(conllText):
     errorsMessages = []
+    currentSentId = ""
     for idxLine, line in enumerate(conllText.rstrip().split("\n"), start=1):
-        errorSuffix = f"Line {idxLine} : "
+        errorSuffix = f"sent_id = {currentSentId} - line = {idxLine} : "
         if line.strip().rstrip():
+            if line[0:12] == "# sent_id = ":
+                currentSentId = line[12:]
             if line[0] != "#":
                 try:
                     _tokenConllToJson(line)

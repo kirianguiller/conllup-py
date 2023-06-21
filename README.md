@@ -82,6 +82,8 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`
 
 ## Changelog
+### 0.4.9
+- indicate conll sent_id for raised errors
 ### 0.4.8
 - raise errors for empty tokens
 ### 0.4.7

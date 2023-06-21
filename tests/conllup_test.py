@@ -219,7 +219,7 @@ PATH_TEST_CONLLU_CONTAINS_MULTIPLE_ERROR = str(PATH_TEST_DATA_FOLDER / "contains
 def test_readConllFile_raise_errors():
     with pytest.raises(ConllParseError) as e_info:
         readConlluFile(PATH_TEST_CONLLU_CONTAINS_MULTIPLE_ERROR)
-    assert e_info.value.args[0] == """Parsing Errors with file `contains_multiple_errors.conllu` :\nLine 5 : COLUMNS NUMBER ERROR : 9 columns found instead of 10  --- line content = \"3	qu'	que	SCONJ	_	_	2	_	SpaceAfter=No\"\nLine 6 : DUPLICATED KEY : found (among others) the duplicated `Mood` key"""
+    assert e_info.value.args[0] == """Parsing Errors with file `contains_multiple_errors.conllu` :\nsent_id = has_9_columns_token_3 - line = 5 : COLUMNS NUMBER ERROR : 9 columns found instead of 10  --- line content = \"3	qu'	que	SCONJ	_	_	2	_	SpaceAfter=No\"\nsent_id = has_9_columns_token_3 - line = 6 : DUPLICATED KEY : found (among others) the duplicated `Mood` key"""
 
 
 def test_getStringForManySentencesJson():
