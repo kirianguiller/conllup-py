@@ -119,6 +119,13 @@ def _tokenConllToJson(nodeConll: str) -> tokenJson_T:
             f'COLUMNS NUMBER ERROR : {len(splittedNodeConll)} columns found instead of 10  --- line content = "{nodeConll}"'
         )
 
+    empty_columns = [i+1 for i, x in enumerate(splittedNodeConll) if x == ""]
+
+    if len(empty_columns) > 0:
+        raise Exception(
+            f'EMPTY COLUMN ERROR : columns {empty_columns} are empty  --- line content = "{nodeConll}"'
+        )
+
     tokenJson = {
         "ID": splittedNodeConll[0],
         "FORM": splittedNodeConll[1],

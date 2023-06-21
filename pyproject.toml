@@ -1,6 +1,6 @@
 [project]
 name = "conllup"
-version = "0.4.7"
+version = "0.4.8"
 dynamic = ["authors", "description", "requires-python", "dependencies", "classifiers", "keywords", "license", "readme"]
 
 [build-system]

@@ -133,6 +133,9 @@ def test_tokenConllToJson():
         _tokenConllToJson(incompleteSmallerTokenLine)
     with pytest.raises(Exception):
         _tokenConllToJson(incompleteBiggerTokenLine)
+    with pytest.raises(Exception) as exc_info:
+        _tokenConllToJson("1\t\t_\t\t_\t_\t_\t_\t_\t_")
+    assert str(exc_info.value) == """EMPTY COLUMN ERROR : columns [2, 4] are empty  --- line content = "1\t\t_\t\t_\t_\t_\t_\t_\t_\""""
 
     assert _tokenConllToJson(tokenConll) == tokenJson
     assert _tokenConllToJson(equalSymbolInMiscOrFeatureTokenConll) == equalSymbolInMiscOrFeatureTokenJson
