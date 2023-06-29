@@ -244,9 +244,9 @@ def _tokenJsonToConll(tokenJson: tokenJson_T) -> str:
     return tokenConll
 
 
-def _compareTokenIndexes(a: str, b: str) -> int:
-    a1 = int(a.split('-')[0])
-    b1 = int(b.split('-')[0])
+def _compareTokenIndexes(a: str, b: str) -> float:
+    a1 = float(a.split('-')[0])
+    b1 = float(b.split('-')[0])
     if a1 - b1 != 0:
         return a1 - b1
     else:
