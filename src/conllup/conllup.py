@@ -205,6 +205,8 @@ def _seperateMetaAndTreeFromSentenceConll(
 def _isGroupToken(tokenJson: tokenJson_T) -> bool:
     return "-" in tokenJson["ID"]
 
+def _isEnhancedToken(tokenJson: tokenJson_T) -> bool:
+    return '.' in tokenJson['ID']
 
 def _metaConllLinesToJson(metaConllLines: List[str]) -> metaJson_T:
     metaJson: metaJson_T = emptyMetaJson()
@@ -240,6 +242,9 @@ def _treeConllLinesToJson(treeConllLines: List[str]) -> treeJson_T:
         if _isGroupToken(tokenJson) == True:
             # the token is a group token
             treeJson["groupsJson"][tokenJson["ID"]] = tokenJson
+        elif _isEnhancedToken(tokenJson) == True:
+            # the token is an enhanced token
+            treeJson["enhancedNodesJson"][tokenJson["ID"]] = tokenJson
         else:
             # the token is a normal token
             treeJson["nodesJson"][tokenJson["ID"]] = tokenJson
@@ -276,13 +281,46 @@ def _tokenJsonToConll(tokenJson: tokenJson_T) -> str:
     return tokenConll
 
 
-def _compareTokenIndexes(a: str, b: str) -> int:
-    a1 = int(a.split('-')[0])
-    b1 = int(b.split('-')[0])
-    if a1 - b1 != 0:
-        return a1 - b1
+def _getPrimaryIndex(tokenIndex: str) -> int:
+    if '-' in tokenIndex:
+        return int(tokenIndex.split('-')[0])
+    elif '.' in tokenIndex:
+        return int(tokenIndex.split('.')[0])
     else:
-        return len(b) - len(a)
+        return int(tokenIndex)
+
+def _getSecondaryIndex(tokenIndex: str) -> int:
+    # get group token second index (if group token), otherwise return 0
+    if '-' in tokenIndex:
+        return int(tokenIndex.split('-')[1])
+    else:
+        return 0
+
+def _getTertiaryIndex(tokenIndex: str) -> int:
+    # get enhanced token second index (if enhanced token), otherwise return 0
+    if '.' in tokenIndex:
+        return int(tokenIndex.split('.')[1])
+    else:
+        return 0
+
+def _compareTokenIndexes(a: str, b: str) -> int:
+    a1, a2, a3 = _getPrimaryIndex(a), _getSecondaryIndex(a), _getTertiaryIndex(a)
+    b1, b2, b3 = _getPrimaryIndex(b), _getSecondaryIndex(b), _getTertiaryIndex(b)
+
+    if a1 != b1 or (not a2 and not a3 and not b2 and not b3):
+        # first numbers are different, or both number are same and without extension (normally impossible)
+        return a1 - b1
+    elif a3 and b3:
+        # both are enhanced tokens with same first number (X.1 and X.2 with X a number)
+        return a3 - b3
+    elif a2 and b2:
+        # both are group tokens with same first number (10-11 ; 10-12) , normally impossible
+        return a2 - b2
+    elif a2 or b3:
+        # either a is group token (they are before normal tokens) or b is enhanced (they are after normal tokens)
+        return -1
+    else:
+        return 1
 
 
 import functools
@@ -301,7 +339,7 @@ def _sortTokensJson(tokensJson: tokensJson_T) -> tokensJson_T:
 
 def _treeJsonToConll(treeJson: treeJson_T) -> str:
     treeConllLines: List[str] = []
-    tokensJson = {**treeJson["nodesJson"], **treeJson["groupsJson"]}
+    tokensJson = {**treeJson["nodesJson"], **treeJson["groupsJson"], **treeJson["enhancedNodesJson"]}
     tokenIndexes = [token["ID"] for token in tokensJson.values()]
     sortedTokenIndexes = _sortTokenIndexes(tokenIndexes)
     for tokenIndex in sortedTokenIndexes:

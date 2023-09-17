@@ -82,6 +82,8 @@ Require to have `pip install twine setuptools build` before doing any build 0) c
 4. Optional : if you want to try the testpypi version of the package `pip install --index-url https://test.pypi.org/simple/ --no-deps conllup`
 
 ## Changelog
+### 3.1.0 (big jump in version to be coherent with [conllup-js](https://github.com/kirianguiller/conllup-js), the Javascript implementation)
+- add support to Enhanced UD specifications ([link here](https://universaldependencies.org/u/overview/enhanced-syntax.html#ellipsis))
 ### 0.4.9
 - indicate conll sent_id for raised errors
 ### 0.4.8

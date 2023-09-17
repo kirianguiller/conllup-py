@@ -108,6 +108,22 @@ groupJson: tokenJson_T = {
     "MISC": {},
 }
 
+# enhanced (empty) node
+enhancedNodeConll: str = "1.2	it's	it's	upos	_	_	_	deprel	_	_"
+enhancedNodeJson: enhancedNodesJson_T = {
+    "ID": "1.2",
+    "FORM": "it's",
+    "LEMMA": "it's",
+    "UPOS": "upos",
+    "XPOS": "_",
+    "FEATS": {},
+    "HEAD": -1,
+    "DEPREL": "deprel",
+    "DEPS": {},
+    "MISC": {},
+}
+
+
 # incomplete line (different than 10 columns per lines)
 incompleteSmallerTokenLine = "1-2	it's	it's	upos	_	_	deprel	_	_"  # has only 9 features
 incompleteBiggerTokenLine = "1-2	it's	it's	upos	_	_	deprel	_	_	_	_"  # has 11 features
@@ -159,11 +175,14 @@ def test_tokenConllToJson():
     assert _tokenConllToJson(tokenConll) == tokenJson
     assert _tokenConllToJson(equalSymbolInMiscOrFeatureTokenConll) == equalSymbolInMiscOrFeatureTokenJson
     assert _tokenConllToJson(groupConll) == groupJson
+    assert _tokenConllToJson(enhancedNodeConll) == enhancedNodeJson
 
 
 def test_tokenJsonToConll():
     assert _tokenJsonToConll(tokenJson) == tokenConll
     assert _tokenJsonToConll(groupJson) == groupConll
+    assert _tokenJsonToConll(enhancedNodeJson) == enhancedNodeConll
+
 
 
 def test_seperateMetaAndTreeFromSentenceConll():
@@ -200,18 +219,23 @@ def test_sentenceJsonToConll():
 
 
 def test_compareTokenIndexes():
-    assert _compareTokenIndexes("3", "1") == 2
-    assert _compareTokenIndexes("1", "4") == -3
-    assert _compareTokenIndexes("2-4", "2") == -2
+    assert _compareTokenIndexes("3", "1") == 2 # 3 is two after 1
+    assert _compareTokenIndexes("1", "4") == -3 # 1 is three before 4
+    assert _compareTokenIndexes("2-4", "2") == -1 # 2-4 is one before 2
+    assert _compareTokenIndexes("2-3", "2-5") == -2 # 2-3 is two before 2-5
+    assert _compareTokenIndexes("2.2", "2") == 1 # 2.2 is after 2 (we don't care how much)
+    assert _compareTokenIndexes("3", "3.4") == -1 # 3 is before 3.4 (we don't care how much)
+    assert _compareTokenIndexes("4-5", "2.1") == 2 # 4-5 is two after 2.1
 
 
 def test_sortTokenIndexes():
-    assert _sortTokenIndexes(["4", "1", "7", "2-6", "2", "6"]) == ["1", "2-6", "2", "4", "6", "7"]
+    assert _sortTokenIndexes(["3-4", "4", "1", "3", "7", "2-6", "2", "3.1", "6"]) == ["1", "2-6", "2", "3-4", "3", "3.1", "4", "6", "7"]
 
 
 sentenceConll2 = """1-2\tit's\t_\t_\t_\t_\t_\t_\t_\t_
 1\tit\tit\t_\t_\t_\t_\t_\t_\t_
 2\t's\t's\t_\t_\t_\t_\t_\t_\t_
+2.1\t's\t's\t_\t_\t_\t_\t_\t_\t_
 """
 
 

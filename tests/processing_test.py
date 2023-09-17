@@ -33,6 +33,7 @@ sentenceJsonToReconstructTextWithSpacesAfter: sentenceJson_T = {
             },
         },
         "groupsJson": emptyNodesOrGroupsJson(),
+        "enhancedNodesJson": emptyNodesOrGroupsJson(),
     },
 }
 
@@ -88,7 +89,11 @@ def test_incrementIndexesOfToken():
     assert incrementIndexesOfToken(emptyNodeJson(ID="6-8", HEAD=9), 4, 5, 7, False) == emptyNodeJson(ID="8-10", HEAD=11)
     assert incrementIndexesOfToken(emptyNodeJson(ID="6-8", HEAD=1), 4, 5, 7, False) == emptyNodeJson(ID="8-10", HEAD=1)
     assert incrementIndexesOfToken(emptyNodeJson(ID="6-8", HEAD=1), 4, 7, 7, False) == emptyNodeJson(ID="-1", HEAD=1)
-
+    
+    # newly added empty node feature
+    assert incrementIndexesOfToken(emptyNodeJson(ID="6.1", HEAD=9), 4, 5, 7, False) == emptyNodeJson(ID="8.1", HEAD=11)
+    # newly added deps feature
+    assert incrementIndexesOfToken(emptyNodeJson(ID="6.1", HEAD=9, DEPS={"9": "mod"}), 4, 5, 7, False) == emptyNodeJson(ID="8.1", HEAD=11, DEPS={"11": "mod"})
 
 treeJsonBefore = {
     "nodesJson":
@@ -96,7 +101,8 @@ treeJsonBefore = {
          "2": emptyNodeJson(ID="2", HEAD=3, FORM="suis"),
          "3": emptyNodeJson(ID="3", HEAD=4, FORM="aujourd'hui"),
          "4": emptyNodeJson(ID="4", HEAD=1, FORM=".")},
-    "groupsJson": {}
+    "groupsJson": {},
+    "enhancedNodesJson": {},
 }
 
 treeJsonAfterWithoutSmartBehavior = {
@@ -106,7 +112,8 @@ treeJsonAfterWithoutSmartBehavior = {
          "3": emptyNodeJson(ID="3", HEAD=-1, FORM="aujourd'"),
          "4": emptyNodeJson(ID="4", HEAD=-1, FORM="hui"),
          "5": emptyNodeJson(ID="5", HEAD=1, FORM=".")},
-    "groupsJson": {}
+    "groupsJson": {},
+    "enhancedNodesJson": {},
 }
 
 treeJsonAfterWithSmartBehavior = {
@@ -116,7 +123,8 @@ treeJsonAfterWithSmartBehavior = {
          "3": emptyNodeJson(ID="3", HEAD=5, FORM="aujourd'", LEMMA="aujourd'"),
          "4": emptyNodeJson(ID="4", HEAD=5, FORM="hui", LEMMA="hui"),
          "5": emptyNodeJson(ID="5", HEAD=1, FORM=".")},
-    "groupsJson": {}
+    "groupsJson": {},
+    "enhancedNodesJson": {},
 }
 
 

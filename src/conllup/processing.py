@@ -1,7 +1,7 @@
 import json
 from typing import List, Tuple, Literal
 
-from .conllup import _isGroupToken, emptyNodesOrGroupsJson, emptyNodeJson, _sortTokensJson
+from .conllup import _isEnhancedToken, _isGroupToken, emptyDepsJson, emptyNodesOrGroupsJson, emptyNodeJson, _sortTokensJson
 from .types import treeJson_T, tokenJson_T
 
 mappingSpacesAfter: List[Tuple[str, str]] = [
@@ -108,6 +108,22 @@ def incrementIndexesOfToken(
             tokenJson["ID"] = newGroupId
         else:
             tokenJson["ID"] = '-1'
+    elif _isEnhancedToken(tokenJson):
+        [tokenJsonId1, tokenJsonId2] = tokenJson["ID"].split('.')
+        newTokenJsonId1 = incrementIndex(
+            'ID',
+            int(tokenJsonId1, 10),
+            startBefore,
+            endBefore,
+            endAfter,
+            smartBehavior,
+        )
+        if newTokenJsonId1 != -1:
+            newEnhancedTokenId = f"{newTokenJsonId1}.{tokenJsonId2}"
+            tokenJson["ID"] = newEnhancedTokenId
+        else:
+            tokenJson["ID"] = '-1'
+        
     else:
         tokenJsonId = tokenJson["ID"]
         newTokenJsonId = incrementIndex(
@@ -134,6 +150,29 @@ def incrementIndexesOfToken(
         tokenJson["HEAD"] = newTokenJsonHead
         if tokenJson["HEAD"] == -1:
             tokenJson["DEPREL"] = '_'
+
+    # handle DEPS
+    newDepsJson = emptyDepsJson()
+    for depHead, depDeprel in tokenJson["DEPS"].items():
+        subHead1 = depHead
+        subHead2 = ''
+        if '.' in depHead:
+            [subHead1, subHead2] = depHead.split('.')
+        newDepHead = str(incrementIndex(
+            'HEAD',
+            int(subHead1 or depHead, 10),
+            startBefore,
+            endBefore,
+            endAfter,
+            smartBehavior,
+        ))
+        if newDepHead != '-1':
+            if subHead2:
+                newDepHead = f"{newDepHead}.{subHead2}"
+            newDepsJson[newDepHead] = depDeprel
+    
+    tokenJson["DEPS"] = newDepsJson
+
     return tokenJson
 
 
@@ -153,6 +192,7 @@ def replaceArrayOfTokens(
 ) -> treeJson_T:
     newNodesJson = emptyNodesOrGroupsJson()
     newGroupsJson = emptyNodesOrGroupsJson()
+    newEnhancedNodesJson = emptyNodesOrGroupsJson()
 
     replaceAction: replaceAction_T = 'OTHER'
 
@@ -191,7 +231,7 @@ def replaceArrayOfTokens(
         newTokenIndex += 1
 
     # add old tokens with corrected indexes
-    for oldTokenJson in {**treeJson["nodesJson"], **treeJson["groupsJson"]}.values():
+    for oldTokenJson in {**treeJson["nodesJson"], **treeJson["groupsJson"], **treeJson["enhancedNodesJson"]}.values():
         oldTokenJsonCopy: tokenJson_T = json.loads(json.dumps(oldTokenJson))
         newTokenJson = incrementIndexesOfToken(
             oldTokenJsonCopy,
@@ -205,8 +245,11 @@ def replaceArrayOfTokens(
             if _isGroupToken(newTokenJson):
                 # the token is a group token
                 newGroupsJson[newTokenJson["ID"]] = newTokenJson
+            elif _isEnhancedToken(newTokenJson):
+                # the token is an enhanced token
+                newEnhancedNodesJson[newTokenJson["ID"]] = newTokenJson
             else:
                 # the token is a normal token
                 newNodesJson[newTokenJson["ID"]] = newTokenJson
-    newTreeJson: treeJson_T = {"nodesJson": _sortTokensJson(newNodesJson), "groupsJson": _sortTokensJson(newGroupsJson)}
+    newTreeJson: treeJson_T = {"nodesJson": _sortTokensJson(newNodesJson), "groupsJson": _sortTokensJson(newGroupsJson), "enhancedNodesJson": _sortTokensJson(newEnhancedNodesJson)}
     return newTreeJson
