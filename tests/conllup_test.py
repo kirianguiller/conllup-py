@@ -2,6 +2,9 @@ from pathlib import Path
 from typing import List
 import pytest
 from src.conllup.conllup import (
+    _depsConllToJson,
+    _depsJsonToConll,
+    emptyDepsJson,
     emptyFeaturesJson,
     emptyNodesOrGroupsJson,
     readConlluFile, _getStringForManySentencesJson, EmptyConllError, ConllParseError, _sortTokensJson,
@@ -12,6 +15,7 @@ from src.conllup.types import (
     treeJson_T,
     tokenJson_T,
     groupsJson_T,
+    enhancedNodesJson_T
 )
 
 from src.conllup.conllup import (
@@ -33,7 +37,7 @@ featuresConll = "feat_key1=feat_value1|feat_key2=feat_value2"
 featuresConllReverseOrder = "feat_key2=feat_value2|feat_key1=feat_value1"
 featuresJson = {"feat_key1": "feat_value1", "feat_key2": "feat_value2"}
 
-tokenConll = "1\tform\tlemma\tupos\txpos\tfeat_key=feat_value\t2\tdeprel\tdep_key=dep_value\tmisc_key=misc_value"
+tokenConll = "1\tform\tlemma\tupos\txpos\tfeat_key=feat_value\t2\tdeprel\tdep_key:dep_value:dep_aux\tmisc_key=misc_value"
 
 tokenJson: tokenJson_T = {
     "ID": "1",
@@ -44,14 +48,15 @@ tokenJson: tokenJson_T = {
     "FEATS": {"feat_key": "feat_value"},
     "HEAD": 2,
     "DEPREL": "deprel",
-    "DEPS": {"dep_key": "dep_value"},
+    "DEPS": {"dep_key": "dep_value:dep_aux"},
     "MISC": {"misc_key": "misc_value"},
 }
 
 
 metaJson: metaJson_T = {"meta_key": "meta_value", "meta_key2": "meta_value2"}
 groupsJson: groupsJson_T = emptyNodesOrGroupsJson()
-treeJson: treeJson_T = {"nodesJson": {"1": tokenJson}, "groupsJson": groupsJson}
+enhancedNodesJson: enhancedNodesJson_T = emptyNodesOrGroupsJson()
+treeJson: treeJson_T = {"nodesJson": {"1": tokenJson}, "groupsJson": groupsJson, "enhancedNodesJson": enhancedNodesJson}
 
 sentenceJson: sentenceJson_T = {"metaJson": metaJson, "treeJson": treeJson}
 
@@ -127,6 +132,20 @@ def test_featuresConllToJsonAndBack():
     
     # json to string to json
     assert _featuresConllToJson(_featuresJsonToConll(featuresJson)) == featuresJson
+
+
+depsConll = "1:deprel1|2:deprel2|3.1:deprel3.1|3.2:deprel3.2"
+emptyDepsConll = "_"
+depsJson = {"1": "deprel1", "2": "deprel2", "3.1": "deprel3.1", "3.2": "deprel3.2"}
+
+
+def test_depsConllToJson():
+    assert _depsConllToJson(depsConll) == depsJson
+    assert _depsConllToJson("_") == emptyDepsJson()
+
+def test_depsJsonToConll():
+    assert _depsJsonToConll(depsJson) == depsConll
+    assert _depsJsonToConll({"1": "deprel1", "2": "deprel2", "3.1": "deprel3.1", "3.2": "deprel3.2"}) == depsConll
 
 def test_tokenConllToJson():
     with pytest.raises(Exception):

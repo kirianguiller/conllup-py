@@ -1,7 +1,7 @@
 import os.path
 from typing import Dict, List, TypedDict, Union, Literal
 
-from .types import featuresJson_T, tokenJson_T, metaJson_T, treeJson_T, sentenceJson_T, tokensJson_T
+from .types import featuresJson_T, depsJson_T, tokenJson_T, metaJson_T, treeJson_T, sentenceJson_T, tokensJson_T
 
 tabLabel_T = Literal[
     "ID", "FORM", "LEMMA", "UPOS", "XPOS", "FEATS", "HEAD", "DEPREL", "DEPS", "MISC"
@@ -17,6 +17,8 @@ class tabMeta_T(TypedDict):
 def emptyFeaturesJson() -> featuresJson_T:
     return {}
 
+def emptyDepsJson() -> depsJson_T:
+    return {}
 
 def emptyNodeJson(ID: str = "_", FORM: str = "_", LEMMA: str = "_", UPOS: str = "_", XPOS: str = "_",
                   FEATS: featuresJson_T = {},
@@ -48,6 +50,7 @@ def emptyTreeJson() -> treeJson_T:
     return {
         "nodesJson": emptyNodesOrGroupsJson(),
         "groupsJson": emptyNodesOrGroupsJson(),
+        "enhancedNodesJson": emptyNodesOrGroupsJson(),
     }
 
 
@@ -88,6 +91,35 @@ def _featuresJsonToConll(featuresJson: featuresJson_T) -> str:
         featuresConll = "_"
     return featuresConll
 
+
+def _depsConllToJson(depsConll: str) -> depsJson_T:
+    if depsConll == "_":
+        return {}
+
+    depsJson = emptyDepsJson()
+    splittedDepsStrings = depsConll.split("|")
+
+    for depKeyValue in splittedDepsStrings:
+        splittedDep = depKeyValue.split(":")
+        depKey = splittedDep[0]
+        depValue = ":".join(
+            splittedDep[1:]
+        )  # reconstructing for this case : '1:main:aux'
+        if depsJson.get(depKey):
+            # we add all duplicated keys in this list, as it's forbidden in conll format
+            raise Exception(f"DUPLICATED KEY : found (among others) the duplicated `{depKey}` key")
+        depsJson[depKey] = depValue
+
+    return depsJson
+
+def _depsJsonToConll(depsJson: depsJson_T) -> str:
+    depItems = list(depsJson.items())
+    depItems.sort(key=lambda item: item[0].lower())
+    splittedDepConll=[f"{item[0]}:{item[1]}" for item in depItems]
+    depsConll = "|".join(splittedDepConll)
+    if depsConll == "":
+        depsConll = "_"
+    return depsConll
 
 def _normalizeHyphensInTab(tokenTabData: str, tabLabel: str):
     """
@@ -135,7 +167,7 @@ def _tokenConllToJson(nodeConll: str) -> tokenJson_T:
         "FEATS": _featuresConllToJson(splittedNodeConll[5]),
         "HEAD": _decode_int_data(splittedNodeConll[6]),
         "DEPREL": splittedNodeConll[7],
-        "DEPS": _featuresConllToJson(splittedNodeConll[8]),
+        "DEPS": _depsConllToJson(splittedNodeConll[8]),
         "MISC": _featuresConllToJson(splittedNodeConll[9])
     }
     return tokenJson
@@ -237,7 +269,7 @@ def _tokenJsonToConll(tokenJson: tokenJson_T) -> str:
     FEATS = _featuresJsonToConll(tokenJson["FEATS"])
     HEAD = _encode_int_data(tokenJson["HEAD"])
     DEPREL = tokenJson["DEPREL"]
-    DEPS = _featuresJsonToConll(tokenJson["DEPS"])
+    DEPS = _depsJsonToConll(tokenJson["DEPS"])
     MISC = _featuresJsonToConll(tokenJson["MISC"])
 
     tokenConll = f"{ID}\t{FORM}\t{LEMMA}\t{UPOS}\t{XPOS}\t{FEATS}\t{HEAD}\t{DEPREL}\t{DEPS}\t{MISC}"

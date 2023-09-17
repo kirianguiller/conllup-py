@@ -2,6 +2,7 @@ from typing import Dict, TypedDict
 
 
 featuresJson_T = Dict[str, str]
+depsJson_T = Dict[str, str]
 
 class tokenJson_T(TypedDict):
     ID: str
@@ -12,16 +13,18 @@ class tokenJson_T(TypedDict):
     FEATS: featuresJson_T
     HEAD: int
     DEPREL: str
-    DEPS: featuresJson_T
+    DEPS: depsJson_T
     MISC: featuresJson_T
 
 tokensJson_T = Dict[str, tokenJson_T]
 nodesJson_T = tokensJson_T
 groupsJson_T = tokensJson_T
+enhancedNodesJson_T = tokensJson_T
 
 class treeJson_T(TypedDict):
     nodesJson: nodesJson_T
     groupsJson: groupsJson_T
+    enhancedNodesJson: enhancedNodesJson_T
 
 
 metaJson_T = Dict[str, str]
