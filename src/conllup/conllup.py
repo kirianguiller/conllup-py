@@ -151,24 +151,24 @@ def _tokenConllToJson(nodeConll: str) -> tokenJson_T:
             f'COLUMNS NUMBER ERROR : {len(splittedNodeConll)} columns found instead of 10  --- line content = "{nodeConll}"'
         )
 
-    empty_columns = [i+1 for i, x in enumerate(splittedNodeConll) if x == ""]
+    # empty_columns = [i+1 for i, x in enumerate(splittedNodeConll) if x == ""]
 
-    if len(empty_columns) > 0:
+    if splittedNodeConll[0] == "":
         raise Exception(
-            f'EMPTY COLUMN ERROR : columns {empty_columns} are empty  --- line content = "{nodeConll}"'
+            f'EMPTY ID COLOMN ERROR : ID column is empty for this line --- $`{nodeConll}`'
         )
 
     tokenJson = {
         "ID": splittedNodeConll[0],
         "FORM": splittedNodeConll[1],
         "LEMMA": splittedNodeConll[2],
-        "UPOS": splittedNodeConll[3],
-        "XPOS": splittedNodeConll[4],
-        "FEATS": _featuresConllToJson(splittedNodeConll[5]),
-        "HEAD": _decode_int_data(splittedNodeConll[6]),
-        "DEPREL": splittedNodeConll[7],
-        "DEPS": _depsConllToJson(splittedNodeConll[8]),
-        "MISC": _featuresConllToJson(splittedNodeConll[9])
+        "UPOS": splittedNodeConll[3] or "_",
+        "XPOS": splittedNodeConll[4] or "_",
+        "FEATS": _featuresConllToJson(splittedNodeConll[5] or "_"),
+        "HEAD": _decode_int_data(splittedNodeConll[6] or "_"),
+        "DEPREL": splittedNodeConll[7] or "_",
+        "DEPS": _depsConllToJson(splittedNodeConll[8] or "_"),
+        "MISC": _featuresConllToJson(splittedNodeConll[9] or "_")
     }
     return tokenJson
 
